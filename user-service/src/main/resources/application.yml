@@ -1,0 +1,70 @@
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/micro_services
+    username: root
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+  application:
+    name: USER-SERVICE
+  config:
+    import: configserver:http://localhost:8085
+
+#    if we want to change the configuration which are store on github suppose now i want to use the
+#    the configuration which is available on application-prod.yml instead of applicaton.yml so use below properties
+#  profiles:
+#    active: prod
+
+server:
+  port: 8081
+
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#  client:
+#    fetch-registry: true
+#    register-with-eureka: true
+#    serviceUrl:
+#      defaultZone: http://localhost:8761/eureka/
+#    health-check:
+#      enabled: true
+
+#Actuator configuration
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        exclude: health
+  endpoint:
+    health:
+      show-details: always
+
+#  Resilience4J configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        register-health-indicator: true
+        event-consumer-buffer-size: 10
+        failure-rate-threshold: 50
+        minimum-number-of-calls: 5
+        automatic-transition-from-open-to-half-open-enabled: true
+        wait-duration-in-open-state: 6s
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-size: 10
+        sliding-window-type: COUNT_BASED
+  retry:
+    instances:
+      ratingHotelService:
+        max-attempts: 3
+        wait-duration: 5s
+
+
+
